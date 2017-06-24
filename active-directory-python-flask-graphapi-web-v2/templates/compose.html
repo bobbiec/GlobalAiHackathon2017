@@ -1,0 +1,22 @@
+<html>
+<head>
+  <title>Azure AD v2.0 App</title>
+</head>
+<body>
+  <h1>Write an email </h1>
+  <form action="{{ url_for('review') }}" method="post">
+    Recipient:<br>
+    <input type="text" name="recipient"><br>
+    Subject:<br>
+    <input type="text" name="subject"><br>
+    Body:<br>
+    <textarea name="body" size="50"> </textarea> <br>
+    <input type="submit" value="Send">
+    <input type="reset" value="Reset">
+  </form>
+  {{ result }}
+  <form action = "{{url_for('logout')}}" method = "POST">
+    <p><input type="submit" value="Logout" style="width:400px"></p>
+  </form>
+</body>
+</html>
