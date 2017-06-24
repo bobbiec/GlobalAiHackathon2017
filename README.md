@@ -1,5 +1,7 @@
 # GlobalAiHackathon2017
 
+Replace all "REPLACEME" variables with actual keys before running, and remove actual keys before committing.
+
 Dependencies:
 python3 - use pip (pip3) to install the following:
 - flask
