@@ -55,7 +55,10 @@ But you couldn’t, you didn’t, and now you’re paying the price, you goddamn
 You’re fucking dead, kiddo.
 """
 
-def getSentiment(sentences, language="en"):
+def getSentiment(text, language="en"):
+    sentences = sent_tokenize(text)
+    sentences = [sentence.strip() for sentence in sentences if sentence != ""]
+
     documents = []
     for i, sentence in enumerate(sentences):
         documents.append({"language":language, "id": str(i),"text": sentence})
@@ -74,14 +77,14 @@ def getSentiment(sentences, language="en"):
     scores = [None] * len(sentences)
     for tup in results["documents"]:
         scores[int(tup["id"])] = tup["score"]
-    return scores
+    return (sentences, scores)
+
+def printSentiments(sentences, scores):
+    pass
 
 def demo(text, nltk=False):
-    sentences = sent_tokenize(text)
-    sentences = [sentence.strip() for sentence in sentences if sentence != ""] # Remove empty sentences
-
     # Sentiment Analysis
-    scores = getSentiment(sentences)
+    sentences, scores = getSentiment(text)
     results = [(sentence, score) for (sentence, score) in zip(sentences, scores)]
     results.sort(key=lambda x: x[1])
     sid = SentimentIntensityAnalyzer()
