@@ -1,6 +1,6 @@
 from flask import Flask, redirect, url_for, session, request, jsonify, render_template
 from flask_oauthlib.client import OAuth, OAuthException
-# from textAnalyze import getSentiment
+from static.textAnalyze import getSentiment, sentimentToList, getClassifier, filterActionItems
 
 # from flask_sslify import SSLify
 
@@ -19,7 +19,7 @@ oauth = OAuth(app)
 # and don't check it into github!!
 microsoft = oauth.remote_app(
     'microsoft',
-    consumer_key='9a171da0-9102-4d95-80b5-fc6431c84b39',
+    consumer_key='REPLACEME',
     consumer_secret='REPLACEME',
     request_token_params={'scope': 'offline_access Mail.ReadWrite'},
     base_url='https://graph.microsoft.com/v1.0/',
@@ -82,7 +82,23 @@ def review():
     recipient = request.form['recipient']
     subject = request.form['subject']
     body = request.form['body']
-    return render_template('compose.html', result="Recipient: %s - Subject: %s - Body: %s" % (recipient, subject, body))
+    action = request.form['action']
+    print(action)
+    if action == "Review":
+        sentences, scores = getSentiment(body)
+        sentiment = sentimentToList(sentences, scores, use_nltk=True)
+        classifier = getClassifier("static/classifier.pickle")
+        actionItems = "\n".join(filterActionItems(classifier, sentences))
+        return render_template('compose.html', sentiment=sentiment,
+                                               actionItems=actionItems,
+                                               recipient=recipient,
+                                               subject=subject,
+                                               body=body)
+    elif action == "Send":
+        return "Sent! (Not really you should write some code here)"
+
+    else:
+        return render_template('compose.html', subject="Something went wrong...")
 
 # If library is having trouble with refresh, uncomment below and implement refresh handler
 # see https://github.com/lepture/flask-oauthlib/issues/160 for instructions on how to do this

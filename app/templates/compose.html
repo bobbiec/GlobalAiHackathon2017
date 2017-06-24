@@ -1,0 +1,29 @@
+<html>
+<head>
+  <title>Putting the AI in email</title>
+</head>
+
+<body>
+  <h1>Write an email </h1>
+  <form action="{{ url_for('review') }}" method="post">
+    Recipient:<br>
+    <input type="text" name="recipient" value="{{ recipient }}"><br>
+    Subject:<br>
+    <input type="text" name="subject" value="{{ subject }}"></input><br>
+    Body:<br>
+    <textarea name="body" size="5000">{{ body }}</textarea> <br>
+    <input type="submit" name="action" value="Review" />
+    <input type="submit" name="action" value="Send" />
+    <input type="reset" value="Reset">
+  </form>
+  {% for line in sentiment %}
+    {{ line }} <br>
+  {% endfor %}
+  <br>
+  Action items: <br>
+  {{ actionItems }}
+  <form action = "{{url_for('logout')}}" method = "POST">
+    <p><input type="submit" value="Logout" style="width:400px"></p>
+  </form>
+</body>
+</html>
