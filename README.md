@@ -1,5 +1,7 @@
 # GlobalAiHackathon2017
 
+Run `python3 app.py` to run the server locally!
+
 Replace all "REPLACEME" variables with actual keys before running, and remove actual keys before committing.
 
 Dependencies:
