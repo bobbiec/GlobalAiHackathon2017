@@ -1,29 +1,70 @@
 <html>
 <head>
   <title>Putting the AI in email</title>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='compose.css') }}">
 </head>
 
 <body>
-  <h1>Write an email </h1>
-  <form action="{{ url_for('review') }}" method="post">
-    Recipient:<br>
-    <input type="text" name="recipient" value="{{ recipient }}"><br>
-    Subject:<br>
-    <input type="text" name="subject" value="{{ subject }}"></input><br>
-    Body:<br>
-    <textarea name="body" size="5000">{{ body }}</textarea> <br>
-    <input type="submit" name="action" value="Review" />
-    <input type="submit" name="action" value="Send" />
-    <input type="reset" value="Reset">
-  </form>
-  {% for line in sentiment %}
-    {{ line }} <br>
-  {% endfor %}
-  <br>
-  Action items: <br>
-  {{ actionItems }}
-  <form action = "{{url_for('logout')}}" method = "POST">
-    <p><input type="submit" value="Logout" style="width:400px"></p>
-  </form>
+  <div id="one">
+    <h1>Write an email </h1>
+    <form action="{{ url_for('review') }}" method="post" class="form">
+      <p class="recipient">
+        <input type="text" name="recipient" value="{{ recipient }}">
+        <label for="recipient">Recipient</label>
+      </p>
+      <p class="subject">
+        <input type="text" name="subject" value="{{ subject }}">
+        <label for="subject">Subject</label>
+      </p>
+      <p class="body">
+        <textarea name="body" size="5000">{{ body }}</textarea>
+        <label for="body">Body</label>
+      </p>
+      <p class="submit">
+        <input type="submit" name="action" value="Review" />
+      </p>
+    </form>
+    <form action = "{{url_for('logout')}}" method = "POST">
+      <p><input type="submit" value="Logout" style="width:400px"></p>
+    </form>
+  </div>
+  <div id="two">
+    <h1>Review your email</h1>
+    <form action="{{ url_for('send') }}" method="post" class="form">
+      <p class="recipient">
+        <input type="text" name="recipient" value="{{ recipient }}" readonly>
+        <label for="recipient">Recipient</label>
+      </p>
+      <p class="subject">
+        <input type="text" name="subject" value="{{ subject }}" readonly>
+        <label for="subject">Subject</label>
+      </p>
+      <p>
+        <div id="review">
+          {%- for item in sentiment -%}
+            <span class="{%- if item[1]|float < -0.5 -%}
+                          neg
+                         {%- elif item[1]|float > 0.5 -%}
+                          pos
+                         {%- else -%}
+                          neutral
+                         {%- endif -%}">{{ item[0] }}</span>
+          {%- endfor -%}
+        </div>
+        <label for="body">Body</label>
+      </p>
+      <p class="submit">
+        <input type="submit" name="action" value="Send" />
+      </p>
+    </form>
+
+    <br>
+    {% if actionItems | length > 0 %}
+    Action items: <br>
+    {% endif %}
+    {% for item in actionItems %}
+    {{ item }} <br>
+    {% endfor %}
+  </div>
 </body>
 </html>

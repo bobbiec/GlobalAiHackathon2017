@@ -2,19 +2,34 @@
 import requests
 import json
 import pickle
-from nltk.tokenize import sent_tokenize
+import nltk.tokenize.punkt as pkt
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from .actionRequired.train import features
 
 API_URL = "https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/sentiment"
 API_KEY = "REPLACEME"
 
+# Preserve newlines in tokenization
+# From https://stackoverflow.com/questions/33139531/preserve-empty-lines-with-nltks-punkt-tokenizer
+class CustomLanguageVars(pkt.PunktLanguageVars):
+    _period_context_fmt = r"""
+        \S*                          # some word material
+        %(SentEndChars)s             # a potential sentence ending
+        \s*                       #  <-- THIS is what I changed
+        (?=(?P<after_tok>
+            %(NonWord)s              # either other punctuation
+            |
+            (?P<next_tok>\S+)     #  <-- Normally you would have \s+ here
+        ))"""
+
 def getSentiment(text, language="en"):
-    sentences = sent_tokenize(text)
-    sentences = [sentence.strip() for sentence in sentences if sentence != ""]
+    ct = pkt.PunktSentenceTokenizer(lang_vars=CustomLanguageVars())
+    sentences = ct.tokenize(text)
+    # sentences = [sentence.strip() for sentence in sentences if sentence != ""]
 
     documents = []
     for i, sentence in enumerate(sentences):
+        print(sentence)
         documents.append({"language":language, "id": str(i),"text": sentence})
 
     r = requests.post(API_URL,
@@ -24,30 +39,25 @@ def getSentiment(text, language="en"):
 
     if r.status_code != 200:
         print("Something went wrong: %s" % r.text)
-        return ([r.text], ["N/A"])
+        return ([r.text], [0])
 
     results = json.loads(r.text)
 
     scores = [None] * len(sentences)
     for tup in results["documents"]:
         scores[int(tup["id"])] = tup["score"]
-    return (sentences, scores)
+    return zip(sentences, scores)
 
-def sentimentToList(sentences, scores, use_nltk=False):
-    temp = []
-    results = [(sentence, score) for (sentence, score) in zip(sentences, scores)]
-    results.sort(key=lambda x: x[1])
+def nltkAdjust(sentiment, weight=0.5):
+    result = []
     sid = SentimentIntensityAnalyzer()
-    for r in results:
-        temp.append("{0:.2f} | {1}".format(r[1], r[0][:70]))
-        if use_nltk:
-            ss = sid.polarity_scores(r[0])
-            for key in ss: # Normalize to same as Azure scale
-                ss[key] = ss[key]/2 + 0.5
-            temp.append("{0:.2f} | neg: {1:.2f}, neu: {2:.2f}, pos: {3:.2f}".format(
-                   ss["compound"], ss["neg"], ss["neu"], ss["pos"]))
-        temp.append("")
-    return temp
+    for sentence, score in sentiment:
+        ss = sid.polarity_scores(sentence)
+        oldScore = (score-0.5) * 2
+        newScore = weight*(ss["compound"]) + (1-weight)*(oldScore)
+        result.append((sentence, newScore))
+    # result.sort(key=lambda x: x[1])
+    return result
 
 def getClassifier(pickled="classifier.pickle"):
     with open(pickled, "rb") as f:
@@ -55,7 +65,7 @@ def getClassifier(pickled="classifier.pickle"):
     return classifier
 
 def filterActionItems(classifier, sentences):
-    return [s for s in sentences if classifier.classify(features(s))]
+    return [s[0] for s in sentences if classifier.classify(features(s[0]))]
 
 def demo(text, nltk=False):
     # Sentiment Analysis

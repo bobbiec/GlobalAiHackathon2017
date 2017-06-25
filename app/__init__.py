@@ -1,13 +1,8 @@
-from flask import Flask, redirect, url_for, session, request, jsonify, render_template
-from flask_oauthlib.client import OAuth, OAuthException
-from static.textAnalyze import getSentiment, sentimentToList, getClassifier, filterActionItems
-
-# from flask_sslify import SSLify
-
-import requests
-
-from logging import Logger
+from flask import Flask, redirect, url_for, session, request, render_template
+from flask_oauthlib.client import OAuth
+from .helper.textAnalyze import getSentiment, nltkAdjust, getClassifier, filterActionItems
 import uuid
+import requests
 
 app = Flask(__name__)
 # sslify = SSLify(app)
@@ -82,23 +77,22 @@ def review():
     recipient = request.form['recipient']
     subject = request.form['subject']
     body = request.form['body']
-    action = request.form['action']
-    print(action)
-    if action == "Review":
-        sentences, scores = getSentiment(body)
-        sentiment = sentimentToList(sentences, scores, use_nltk=True)
-        classifier = getClassifier("static/classifier.pickle")
-        actionItems = "\n".join(filterActionItems(classifier, sentences))
-        return render_template('compose.html', sentiment=sentiment,
-                                               actionItems=actionItems,
-                                               recipient=recipient,
-                                               subject=subject,
-                                               body=body)
-    elif action == "Send":
-        return "Sent! (Not really you should write some code here)"
 
-    else:
-        return render_template('compose.html', subject="Something went wrong...")
+    print(body)
+
+    initialSentiment = getSentiment(body)
+    sentiment = nltkAdjust(initialSentiment)
+    classifier = getClassifier("app/helper/classifier.pickle")
+    actionItems = filterActionItems(classifier, sentiment)
+    return render_template('compose.html', sentiment=sentiment,
+                                           actionItems=actionItems,
+                                           recipient=recipient,
+                                           subject=subject,
+                                           body=body)
+
+@app.route('/send', methods=["POST"])
+def send():
+    return "Sent! Not really."
 
 # If library is having trouble with refresh, uncomment below and implement refresh handler
 # see https://github.com/lepture/flask-oauthlib/issues/160 for instructions on how to do this
