@@ -38,7 +38,7 @@ def getSentiment(text, language="en"):
 
     if r.status_code != 200:
         print("Something went wrong: %s" % r.text)
-        return ([r.text], [0])
+        return [(r.text, 0)]
 
     results = json.loads(r.text)
 

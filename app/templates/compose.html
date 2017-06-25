@@ -18,14 +18,14 @@
       </p>
       <p class="body">
         <textarea name="body" size="5000">{{ body }}</textarea>
-        <label for="body">Body</label>
       </p>
       <p class="submit">
         <input type="submit" name="action" value="Review" />
       </p>
     </form>
+    <br><br><br><br><br><br><br><br>
     <form action = "{{url_for('logout')}}" method = "POST">
-      <p><input type="submit" value="Logout" style="width:400px"></p>
+      <p><input type="submit" value="Logout" style="width:350px"></p>
     </form>
   </div>
   {% if review %}
@@ -58,8 +58,20 @@
           {%- endfor -%}
         </div>
         <input type="text" style="display:none" name="body" value="{{ body }}" readonly>
-        <label for="body">Body</label>
       </p>
+      <div id="feedback">
+      {%- if actions == 0 -%}
+        <span class="neg">Warning:</span> Your email has no clear action items</span>. <br>
+        <span class="pos">Suggestion:</span> If there are specific tasks you want recipients to do, make those tasks as clear as possible.
+      {%- elif actions == 1 and not lastaction -%}
+        <span class="neg">Warning:</span> Your email contains an action item in the middle of the email, which is harder for readers to notice.<br>
+        <span class="pos">Suggestion:</span> Move action items to the top or bottom.
+      {%- elif actions > 1 -%}
+        <span class="pos">Suggestion:</span> Consider organizing multiple action items explicitly in a list.
+      {%- else -%}
+        <span class="pos">Everything looks good!</span>
+      {%- endif -%}
+      </div>
       <p class="submit">
         <input type="submit" name="action" value="Send" />
       </p>

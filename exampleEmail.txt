@@ -7,3 +7,36 @@ Before we start to contact individual students, we are giving you all a chance t
 If you have committed a violation of academic integrity, please send me an email as soon as possible to set up a meeting.
 
 Professor _______
+
+
+---
+
+Hi, Team.
+
+We will be introducing the new company product in two weeks and expect it to be a resounding success. Sorry that you've had to work so hard recently, but we're almost done.
+
+As we have all discussed, it is very important that we all work on product launch related tasks in a timely fashion to ensure it goes off flawlessly.
+
+Looking forward to your cooperation.
+
+Best,
+
+Amy Smith
+
+---
+
+Hi, Team.
+
+We will be introducing the new company product in two weeks and expect it to be a resounding success. Thank you for all your hard work up to this point - we're almost done.
+
+Phrasing 1:
+As we have all discussed, it is very important that we all work on product launch related tasks in a timely fashion to ensure it goes off flawlessly.
+
+Phrasing 2:
+Remember to check Jira and keep up with your assigned launch-related tasks so everything will go well!
+
+Looking forward to your cooperation.
+
+Best,
+
+Amy Smith

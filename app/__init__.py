@@ -84,10 +84,13 @@ def review():
     sentiment = nltkAdjust(initialSentiment)
     classifier = getClassifier('app/helper/classifier.pickle')
     results = filterActionItems(classifier, sentiment)
+    actions = len([x for x in results if x[2]])
     return render_template('compose.html', results=results,
                                            recipient=recipient,
                                            subject=subject,
                                            body=body,
+                                           actions=actions,
+                                           lastaction=results[-2][2],
                                            review=True)
 
 
