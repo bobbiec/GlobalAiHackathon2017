@@ -3,6 +3,7 @@ from flask_oauthlib.client import OAuth
 from .helper.textAnalyze import getSentiment, nltkAdjust, getClassifier, filterActionItems
 import uuid
 import requests
+import json
 
 app = Flask(__name__)
 # sslify = SSLify(app)
@@ -16,12 +17,13 @@ microsoft = oauth.remote_app(
     'microsoft',
     consumer_key='REPLACEME',
     consumer_secret='REPLACEME',
-    request_token_params={'scope': 'offline_access Mail.ReadWrite'},
+    request_token_params={'scope': 'offline_access Mail.ReadWrite Mail.Send'},
     base_url='https://graph.microsoft.com/v1.0/',
     request_token_url=None,
     access_token_method='POST',
     access_token_url='https://login.microsoftonline.com/common/oauth2/v2.0/token',
-    authorize_url='https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
+    authorize_url='https://login.microsoftonline.com/common/oauth2/v2.0/authorize',
+    content_type='application/json'
 )
 
 
@@ -52,13 +54,13 @@ def authorized():
     response = microsoft.authorized_response()
 
     if response is None:
-        return "Access Denied: Reason=%s\nError=%s" % (
+        return 'Access Denied: Reason=%s\nError=%s' % (
             response.get('error'),
             request.get('error_description')
         )
 
     # Check response for state
-    print("Response: " + str(response))
+    print('Response: ' + str(response))
     if str(session['state']) != str(request.args['state']):
         raise Exception('State has been messed with, end authentication')
 
@@ -72,27 +74,50 @@ def authorized():
 def compose():
     return render_template('compose.html')
 
-@app.route('/review', methods=["POST"])
+@app.route('/review', methods=['POST'])
 def review():
     recipient = request.form['recipient']
     subject = request.form['subject']
     body = request.form['body']
 
-    print(body)
-
     initialSentiment = getSentiment(body)
     sentiment = nltkAdjust(initialSentiment)
-    classifier = getClassifier("app/helper/classifier.pickle")
-    actionItems = filterActionItems(classifier, sentiment)
-    return render_template('compose.html', sentiment=sentiment,
-                                           actionItems=actionItems,
+    classifier = getClassifier('app/helper/classifier.pickle')
+    results = filterActionItems(classifier, sentiment)
+    return render_template('compose.html', results=results,
                                            recipient=recipient,
                                            subject=subject,
-                                           body=body)
+                                           body=body,
+                                           review=True)
 
-@app.route('/send', methods=["POST"])
+
+@app.route('/send', methods=['POST'])
 def send():
-    return "Sent! Not really."
+    recipient = request.form['recipient']
+    subject = request.form['subject']
+    body = request.form['body']
+
+    r = microsoft.post('me/sendMail', content_type="application/json",
+                        headers={'content-type': 'application/json'},
+                        data=json.dumps({'Message': {
+                                            'subject': subject,
+                                            'body': {
+                                                'contentType': 'text',
+                                                'content': body
+                                            },
+                                            'toRecipients': [{
+                                                'emailAddress': {
+                                                    'address': recipient
+                                                }
+                                            }]
+                                            },
+                                        'SaveToSentItems': 'true'
+                                        })
+                            )
+
+    if r.status == 202: result = "Success! Insert link back here"
+    else: result = "Failed..."
+    return result
 
 # If library is having trouble with refresh, uncomment below and implement refresh handler
 # see https://github.com/lepture/flask-oauthlib/issues/160 for instructions on how to do this

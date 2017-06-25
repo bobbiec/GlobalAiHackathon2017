@@ -63,6 +63,11 @@ div#two h1 {
   color: #999999;
 }
 
+.legend p {
+  float:right;
+  width:200px;
+}
+
 .submit input {
   width: auto;
   padding: 9px 15px;
@@ -74,12 +79,45 @@ div#two h1 {
   -webkit-border-radius: 5px;
 }
 
-
-
 .neg {
-  color: red;
+  color: white;
+  background-color: red;
 }
 
 .pos {
-  color: green;
+  background-color: palegreen;
+}
+
+.action {
+  background-color: darkblue;
+  color: white;
+}
+
+#action-tooltip, #pos-tooltip, #neg-tooltip {
+    display:none;
+}
+
+.action:hover #action-tooltip,
+.pos:hover #pos-tooltip,
+.neg:hover #neg-tooltip {
+  display:block;
+  position: relative;
+  top:-15px;
+  width: 100px;
+  padding:10px;
+  float:right;
+}
+
+.action:hover #action-tooltip {
+  color: blue;
+}
+
+.pos:hover #pos-tooltip {
+  background-color: green;
+  color: white;
+}
+
+.neg:hover #neg-tooltip {
+  background-color: white;
+  color: red;
 }

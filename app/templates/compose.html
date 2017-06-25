@@ -28,6 +28,7 @@
       <p><input type="submit" value="Logout" style="width:400px"></p>
     </form>
   </div>
+  {% if review %}
   <div id="two">
     <h1>Review your email</h1>
     <form action="{{ url_for('send') }}" method="post" class="form">
@@ -39,32 +40,32 @@
         <input type="text" name="subject" value="{{ subject }}" readonly>
         <label for="subject">Subject</label>
       </p>
+      <div class="legend">
+        <p>
+          <span class="neg">Negative</span> <br>
+          <span class="pos">Positive</span> <br>
+          <span class="action">Action Item</span>
+        </p>
+      </div>
       <p>
         <div id="review">
-          {%- for item in sentiment -%}
-            <span class="{%- if item[1]|float < -0.5 -%}
-                          neg
-                         {%- elif item[1]|float > 0.5 -%}
-                          pos
-                         {%- else -%}
-                          neutral
-                         {%- endif -%}">{{ item[0] }}</span>
+          {%- for item in results -%}
+            <span class="{%- if item[1]|float < -0.5 -%} neg
+                         {%- elif item[1]|float > 0.5 -%} pos
+                         {%- else -%} neutral
+                         {%- endif %} {{ item[1] }}
+                         {%- if item[2] %} action{%- endif -%}">{{ item[0] }}<span id="action-tooltip">This has been identified as an <b>action item</b></span><span id="neg-tooltip">This is a <b>negative</b> sentence :(</span><span id="pos-tooltip">This is a <b>positive</b> sentence!</span></span>
           {%- endfor -%}
         </div>
+        <input type="text" style="display:none" name="body" value="{{ body }}" readonly>
         <label for="body">Body</label>
       </p>
       <p class="submit">
         <input type="submit" name="action" value="Send" />
       </p>
     </form>
-
     <br>
-    {% if actionItems | length > 0 %}
-    Action items: <br>
-    {% endif %}
-    {% for item in actionItems %}
-    {{ item }} <br>
-    {% endfor %}
   </div>
+  {% endif %}
 </body>
 </html>

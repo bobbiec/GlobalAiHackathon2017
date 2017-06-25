@@ -29,7 +29,6 @@ def getSentiment(text, language="en"):
 
     documents = []
     for i, sentence in enumerate(sentences):
-        print(sentence)
         documents.append({"language":language, "id": str(i),"text": sentence})
 
     r = requests.post(API_URL,
@@ -65,7 +64,8 @@ def getClassifier(pickled="classifier.pickle"):
     return classifier
 
 def filterActionItems(classifier, sentences):
-    return [s[0] for s in sentences if classifier.classify(features(s[0]))]
+    return [(s[0], s[1], True) if classifier.classify(features(s[0]))
+            else (s[0], s[1], False) for s in sentences]
 
 def demo(text, nltk=False):
     # Sentiment Analysis
